@@ -1,0 +1,27 @@
+<div class="view-comp-container">
+  <h2>Flight List Viewer (Modern Angular)</h2>
+
+  <ng-template #actionsBlock let-flight="rowItem">
+    <mat-menu #flightMenu="matMenu">
+      <button mat-menu-item (click)="editFlight(flight)">
+        <mat-icon>edit</mat-icon>
+        <span>Edit ({{ flight.flightNo }})</span>
+      </button>
+      <button mat-menu-item (click)="deleteFlight(flight)">
+        <mat-icon>delete</mat-icon>
+        <span>Delete</span>
+      </button>
+    </mat-menu>
+
+    <button mat-icon-button [matMenuTriggerFor]="flightMenu">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  </ng-template>
+
+  <app-flight-list
+    [tableData]="myFlights()"
+    [columns]="myTableConfig()"
+    [enableSort]="true"
+    [enableFilter]="true"
+  ></app-flight-list>
+</div>

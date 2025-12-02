@@ -1,0 +1,132 @@
+<div class="flight-list-container">
+  <div class="table-controls">
+    @if (enableFilter()) {
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Filter Data</mat-label>
+      <input
+        matInput
+        (keyup)="applyFilter($event)"
+        placeholder="Ex. Flight 101"
+      />
+    </mat-form-field>
+    }
+
+    <button
+      mat-icon-button
+      [matMenuTriggerFor]="columnMenu"
+      aria-label="Toggle column visibility"
+    >
+      <mat-icon
+        aria-hidden="false"
+        aria-label="Example home icon"
+        fontIcon="filter_alt"
+      ></mat-icon>
+    </button>
+
+    <mat-menu #columnMenu="matMenu">
+      @if(getOrderedColumn().length === 0) {
+      <div mat-menu-item disabled>No columns defined.</div>
+      } @for (col of getOrderedColumn(); track col.field) {
+      <div class="mat-menu-item-container">
+        <mat-checkbox
+          [checked]="isColumnVisible(col.field)"
+          (change)="toggleColumn(col.field, $event.checked)"
+        >
+          {{ col.label }}
+        </mat-checkbox>
+      </div>
+      }
+    </mat-menu>
+  </div>
+
+  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+    @for (col of columns(); track col.field) {
+    <ng-container
+      [matColumnDef]="col.field"
+      [sticky]="col.sticky"
+      [stickyEnd]="col.sticky"
+    >
+      <th
+        mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header
+        [disabled]="!enableSort()"
+        [matTooltip]="col.headerTooltip || ''"
+        [matTooltipDisabled]="!col.headerTooltip"
+        [matTooltipPosition]="col.tooltip?.position || 'above'"
+      >
+        {{ col.label }}
+      </th>
+
+      <td
+        mat-cell
+        *matCellDef="let row"
+        [class]="col.cssClass"
+        [style.justifyContent]="col.alignment || 'flex-start'"
+      >
+        @if (col.tooltip) {
+        <span
+          [matTooltip]="col.tooltip.value(row)"
+          [matTooltipPosition]="col.tooltip.position || 'above'"
+          [matTooltipDisabled]="
+            col.tooltip.disabled ? col.tooltip.disabled(row) : false
+          "
+        >
+          <ng-container
+            *ngTemplateOutlet="
+              cellContentTemplate;
+              context: { $implicit: row, col: col }
+            "
+          ></ng-container>
+        </span>
+        } @else {
+        <ng-container
+          *ngTemplateOutlet="
+            cellContentTemplate;
+            context: { $implicit: row, col: col }
+          "
+        ></ng-container>
+        }
+      </td>
+    </ng-container>
+    }
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" [attr.colspan]="displayedColumns().length">
+        No data matching the filter
+      </td>
+    </tr>
+  </table>
+</div>
+
+<ng-template #cellContentTemplate let-row let-col="col">
+  @switch (col.type) { @case ('date') {
+  {{ row[col.field] | date : col.dateFormat || "shortDate" }}
+  } @case ('icon') {
+  <mat-icon
+    [color]="col.icon?.color?.(row)"
+    [svgIcon]="col.icon?.isSvg ? col.icon?.name(row) : ''"
+    [fontIcon]="!col.icon?.isSvg ? col.icon?.name(row) : ''"
+    [ngClass]="col.icon?.onClick ? 'clickable-icon' : ''"
+    (click)="col.icon?.onClick?.(row)"
+  ></mat-icon>
+  } @case ('icon-button') {
+  <button mat-icon-button (click)="col.icon?.onClick?.(row)">
+    <mat-icon
+      [color]="col.icon?.color?.(row)"
+      [svgIcon]="col.icon?.isSvg ? col.icon?.name(row) : ''"
+      [fontIcon]="!col.icon?.isSvg ? col.icon?.name(row) : ''"
+    ></mat-icon>
+  </button>
+  } @case ('button-menu') {
+  <ng-container
+    [ngTemplateOutlet]="col.menu?.menuBlockReference"
+    [ngTemplateOutletContext]="{ rowItem: row }"
+  ></ng-container>
+  } @default {
+  {{ row[col.field] }}
+  } }
+</ng-template>

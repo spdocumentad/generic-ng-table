@@ -1,0 +1,17 @@
+.flight-list-container {
+  // Enables horizontal scrolling when the content is wider than this width
+  overflow-x: auto;
+  // Helps ensure the sticky elements are positioned relative to this container
+  position: relative;
+
+  // Example for vertical scrolling (if needed for sticky header/footer)
+  // max-height: 500px;
+  // overflow-y: auto;
+}
+.filter-field {
+  width: 100%;
+  max-width: 300px;
+}
+table {
+  width: 1000px;
+}
