@@ -28,6 +28,7 @@
         mat-sort-header="{{ col.field }}"
         [attr.mat-sort-start]="'asc'"
         [ngClass]="col.cssClasses"
+        [disabled]="col.sortable === false"
         [matTooltip]="col.label + (col.sticky ? ' (Sticky)' : '')"
       >
         {{ col.label }}

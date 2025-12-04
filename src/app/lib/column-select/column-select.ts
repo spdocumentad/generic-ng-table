@@ -1,12 +1,11 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { TableService } from '../table-service';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
-import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-column-select',
-  imports: [MatMenu, MatMenuTrigger, MatIcon, MatCheckbox],
+  imports: [MatMenu, MatMenuTrigger, MatCheckbox],
   templateUrl: './column-select.html',
   styleUrl: './column-select.scss',
 })

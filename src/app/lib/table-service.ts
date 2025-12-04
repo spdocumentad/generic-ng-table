@@ -8,12 +8,19 @@ export class TableService<T> {
   // Define a sensible default state structure
   private DEFAULT_STATE: Omit<
     TableState<T>,
-    'data' | 'columns' | 'identifier' | 'selectedRows' | 'maxSelectionLimit'
+    | 'data'
+    | 'columns'
+    | 'identifier'
+    | 'selectedRows'
+    | 'maxSelectionLimit'
+    | 'criteriaFilters'
+    | 'availableFilterOptions'
+    | 'multiSelect'
   > = {
     id: 'default-table',
     sortable: true,
     sort: { key: 'id' as Extract<keyof T, string>, direction: 'asc' },
-    filter: '',
+    globalFilter: '',
     columnVisibility: {},
     disabled: false,
   };
@@ -24,8 +31,11 @@ export class TableService<T> {
     data: [],
     columns: [],
     identifier: 'id' as Extract<keyof T, string>, // Placeholder identifier
+    multiSelect: false,
     selectedRows: [], // Initial selected row state
     maxSelectionLimit: undefined, // Default: no limit
+    criteriaFilters: {} as Record<Extract<keyof T, string>, string[]>, // NEW: Initialize criteria filters
+    availableFilterOptions: {} as Record<Extract<keyof T, string>, string[]>, // NEW: Initialize available options
   });
 
   public readonly state = this._state.asReadonly();
@@ -35,18 +45,52 @@ export class TableService<T> {
     let data = [...this.state().data]; // Start with the raw data from the state
     const currentState = this.state();
 
-    // 1. Apply Filter
-    if (currentState.filter) {
-      data = this.applyFilter(data, currentState.filter);
+    // 1. Apply Global Filter (Text Search)
+    if (currentState.globalFilter) {
+      data = this.applyGlobalFilter(data, currentState.globalFilter);
     }
 
-    // 2. Apply Sort
+    // 2. Apply Criteria Filters (Multi-Select Dropdowns)
+    data = this.applyCriteriaFilters(data, currentState.criteriaFilters);
+
+    // 3. Apply Sort
     if (currentState.sort.direction) {
       data = this.applySort(data, currentState.sort);
     }
 
     return data;
   });
+
+  /**
+   * Derives unique options for all fields marked as filterableByCriteria.
+   */
+  private deriveAvailableFilterOptions(
+    data: T[],
+    columns: ColumnState<T>[]
+  ): Record<Extract<keyof T, string>, string[]> {
+    const options: Record<Extract<keyof T, string>, string[]> = {} as Record<
+      Extract<keyof T, string>,
+      string[]
+    >;
+    const filterableFields = columns
+      .filter((col) => col.filterableByCriteria)
+      .map((col) => col.field);
+
+    filterableFields.forEach((field) => {
+      const uniqueValues = new Set<string>();
+      data.forEach((item) => {
+        const value = (item as any)[field];
+        // Format boolean values to 'Yes'/'No' or string representations
+        const stringValue =
+          typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value);
+        if (stringValue) {
+          uniqueValues.add(stringValue);
+        }
+      });
+      options[field] = Array.from(uniqueValues).sort();
+    });
+    return options;
+  }
 
   /**
    * Sets the initial configuration and data for the table.
@@ -59,6 +103,7 @@ export class TableService<T> {
     data: T[],
     columns: ColumnState<T>[],
     identifier: Extract<keyof T, string>,
+    multiSelect: boolean = false,
     maxSelectionLimit?: number
   ): void {
     // Calculate initial column visibility based on the 'sticky' flag or a defined hidden state
@@ -76,6 +121,11 @@ export class TableService<T> {
 
     const defaultSortKey = columnKeys[0] || 'id';
 
+    const availableFilterOptions = this.deriveAvailableFilterOptions(
+      data,
+      columns
+    );
+
     this._state.update((current) => ({
       ...current,
       data: data,
@@ -86,8 +136,11 @@ export class TableService<T> {
         key: defaultSortKey as Extract<keyof T, string>,
         direction: 'asc',
       },
+      multiSelect: multiSelect,
       selectedRows: [], // Clear selection on initial data load
       maxSelectionLimit: maxSelectionLimit, // Set the limit
+      criteriaFilters: {} as Record<Extract<keyof T, string>, string[]>,
+      availableFilterOptions: availableFilterOptions,
     }));
   }
 
@@ -102,12 +155,37 @@ export class TableService<T> {
     }));
   }
 
-  updateFilter(filterValue: string): void {
+  updateGlobalFilter(filterValue: string): void {
     this._state.update((current) => ({
       ...current,
-      filter: filterValue,
-      selectedRows: [], // REQUIREMENT: Clear selection when filter changes
+      globalFilter: filterValue,
+      selectedRows: [], // Clear selection when filter changes
     }));
+  }
+
+  /**
+   * Updates the selected criteria values for a specific filter field.
+   */
+  updateCriteriaFilter(
+    field: Extract<keyof T, string>,
+    selectedValues: string[]
+  ): void {
+    this._state.update((current) => {
+      const newCriteria = { ...current.criteriaFilters };
+
+      if (selectedValues.length > 0) {
+        newCriteria[field] = selectedValues;
+      } else {
+        // Remove the field from the criteria if no options are selected
+        delete newCriteria[field];
+      }
+
+      return {
+        ...current,
+        criteriaFilters: newCriteria,
+        selectedRows: [], // Clear selection when filter changes
+      };
+    });
   }
 
   /**
@@ -121,6 +199,7 @@ export class TableService<T> {
       const currentSelectedRows = current.selectedRows;
       const identifierKey = current.identifier;
       const limit = current.maxSelectionLimit;
+      const isMultiSelect = current.multiSelect;
 
       // Check if the row is already selected based on its unique identifier
       const isSelected = currentSelectedRows.some(
@@ -138,13 +217,16 @@ export class TableService<T> {
         );
         success = true;
       } else {
-        // Select: check limit before adding
-        if (limit === undefined || currentSelectedRows.length < limit) {
-          // Add the new row to the array
+        if (!isMultiSelect) {
+          // Single-select mode: Replace existing selection with the new row
+          newSelectedRows = [row];
+          success = true;
+        } else if (limit === undefined || currentSelectedRows.length < limit) {
+          // Multi-select mode & within limit: Add the new row
           newSelectedRows = [...currentSelectedRows, row];
           success = true;
         } else {
-          // Limit reached, keep current array
+          // Multi-select mode & limit exceeded: Selection failed
           newSelectedRows = currentSelectedRows;
           success = false;
         }
@@ -168,7 +250,7 @@ export class TableService<T> {
   // --- Core Processing Logic (Now type-safe with T) ---
 
   // Filtering remains generic, checking string conversion of values
-  private applyFilter(data: T[], filter: string): T[] {
+  private applyGlobalFilter(data: T[], filter: string): T[] {
     const lowerCaseFilter = filter.toLowerCase();
 
     // Get the fields that are currently configured for filtering (usually all of them)
@@ -180,6 +262,43 @@ export class TableService<T> {
         return String(value).toLowerCase().includes(lowerCaseFilter);
       })
     );
+  }
+
+  /**
+   * Applies all currently active criteria filters.
+   */
+  private applyCriteriaFilters(
+    data: T[],
+    criteria: Record<Extract<keyof T, string>, string[]>
+  ): T[] {
+    const activeFields = Object.keys(criteria) as Extract<keyof T, string>[];
+
+    if (activeFields.length === 0) {
+      return data;
+    }
+
+    return data.filter((item) => {
+      // A row must satisfy ALL active criteria fields (AND logic)
+      return activeFields.every((field) => {
+        const selectedOptions = criteria[field];
+        const itemValue = (item as any)[field];
+
+        if (selectedOptions.length === 0) {
+          return true; // No selection means the criteria is inactive
+        }
+
+        // Format item value to string for comparison (handling booleans)
+        const itemStringValue =
+          typeof itemValue === 'boolean'
+            ? itemValue
+              ? 'Yes'
+              : 'No'
+            : String(itemValue);
+
+        // Check if the item's value is present in the list of selected options (OR logic)
+        return selectedOptions.includes(itemStringValue);
+      });
+    });
   }
 
   // Sorting relies on the active column key existing on the object T

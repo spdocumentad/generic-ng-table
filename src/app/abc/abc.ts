@@ -1,10 +1,18 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { TableService } from '../lib/table-service';
 import { SmartTable } from '../lib/smart-table/smart-table';
-import { TableFilter } from '../lib/table-filter/table-filter';
 import { ColumnSelect } from '../lib/column-select/column-select';
 import { ColumnState } from '../lib/table-state';
+import { SelectFilter } from '../lib/select-filter/select-filter';
+import { TableFilter } from '../lib/table-filter/table-filter';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 // Define the specific type T (User/Item/Product)
 interface GenericItem {
@@ -18,12 +26,25 @@ interface GenericItem {
 @Component({
   selector: 'app-abc',
   standalone: true,
-  imports: [SmartTable, TableFilter, ColumnSelect, MatCardModule],
+  imports: [
+    SmartTable,
+    TableFilter,
+    ColumnSelect,
+    SelectFilter,
+    MatCardModule,
+    MatExpansionModule,
+  ],
   templateUrl: './abc.html',
   styleUrl: './abc.scss',
   providers: [{ provide: TableService, useClass: TableService }],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Abc implements OnInit {
+  readonly panelOpenState = signal(true);
+  readonly criteriaFilterFields = [
+    { field: 'department', label: 'Filter by Department' },
+  ];
+
   // 1. Define the full list of column keys
   readonly displayedColumns: string[] = [
     'id',
@@ -48,7 +69,12 @@ export class Abc implements OnInit {
       type: 'text',
       cssClasses: 'font-bold',
     },
-    { field: 'department', label: 'Department', type: 'text' },
+    {
+      field: 'department',
+      label: 'Department',
+      type: 'text',
+      filterableByCriteria: true,
+    },
     {
       field: 'salary',
       label: 'Annual Salary',
@@ -63,6 +89,8 @@ export class Abc implements OnInit {
       type: 'boolean',
       alignment: 'center',
       visible: false,
+      sortable: false,
+      filterableByCriteria: true,
     },
     {
       // Note: The field name here is arbitrary as no data is displayed, but must be unique.
@@ -71,6 +99,7 @@ export class Abc implements OnInit {
       type: 'menu',
       sticky: true, // Stick the menu to the right side
       alignment: 'center',
+      sortable: false,
       menuItems: [
         {
           label: 'Promote',
@@ -125,6 +154,20 @@ export class Abc implements OnInit {
       salary: 85000,
       isExternal: true,
     },
+    {
+      id: 106,
+      name: 'Frank Miller',
+      department: 'Sales',
+      salary: 110000,
+      isExternal: false,
+    },
+    {
+      id: 107,
+      name: 'Grace Hall',
+      department: 'Engineering',
+      salary: 135000,
+      isExternal: false,
+    },
   ];
 
   // Extract all field names for filter/select components
@@ -154,6 +197,7 @@ export class Abc implements OnInit {
       this.tableData,
       this.columnsConfig,
       'id', // Identifier field
+      false,
       3
     );
   }

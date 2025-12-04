@@ -1,0 +1,10 @@
+.filter-controls-container {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  flex-wrap: wrap;
+}
+.filter-dropdown {
+  width: 250px;
+  max-width: 100%;
+}

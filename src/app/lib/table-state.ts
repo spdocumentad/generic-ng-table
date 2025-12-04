@@ -13,10 +13,15 @@ export interface TableState<T> {
     key: Extract<keyof T, string>;
     direction: SortDirection;
   };
-  filter: string; // Global search string
+  globalFilter: string; // Global search string
+  criteriaFilters: Record<Extract<keyof T, string>, string[]>;
+  availableFilterOptions: Record<Extract<keyof T, string>, string[]>;
+
   columnVisibility: Record<string, boolean>; // e.g., { 'id': true, 'name': false }
 
   disabled?: boolean;
+
+  multiSelect?: boolean;
   selectedRows: T[]; // Holds the currently selected row data
   maxSelectionLimit?: number; // Max number of rows that can be selected
 }
@@ -25,6 +30,7 @@ export interface ColumnState<T> {
   field: Extract<keyof T, string>; // The data field name (used for matColumnDef)
   label: string;
   sticky?: boolean;
+  sortable?: boolean;
   type:
     | 'text'
     | 'number'
@@ -44,7 +50,7 @@ export interface ColumnState<T> {
     | 'space-around';
 
   cssClasses?: string;
-
+  filterableByCriteria?: boolean;
   menuItems?: MenuItem<T>[];
 
   tooltip?: Tooltip<T>;

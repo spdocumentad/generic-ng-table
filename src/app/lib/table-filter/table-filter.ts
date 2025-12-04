@@ -16,10 +16,10 @@ export class TableFilter<T extends object> {
   private tableService = inject(TableService<T>);
 
   // Get the filter value directly from the service state Signal
-  filterValue = computed(() => this.tableService.state().filter);
+  filterValue = computed(() => this.tableService.state().globalFilter);
 
   onFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.tableService.updateFilter(filterValue.trim().toLowerCase());
+    this.tableService.updateGlobalFilter(filterValue.trim().toLowerCase());
   }
 }
