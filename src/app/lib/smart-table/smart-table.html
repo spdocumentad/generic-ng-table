@@ -50,6 +50,16 @@
         </mat-icon>
         } @case ('icon') {
         <mat-icon> {{ getCellValue(element, col) }} </mat-icon>
+        }@case ('menu') {
+        <!-- Three-dot menu for actions -->
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="actionsMenu"
+          (click)="openMenu($event, element)"
+          aria-label="Row actions menu"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
         } @default {
         {{ getCellValue(element, col) }}
         } }
@@ -76,3 +86,23 @@
     }
   </table>
 </div>
+
+<!-- Reusable Angular Material Menu Definition -->
+<mat-menu #actionsMenu="matMenu">
+  <!-- Iterate over the menuItems of the currently opened menu column.
+         We must find the column that has type 'menu' and get its menuItems. 
+         This assumes only one menu column is visible at a time. -->
+  @for (col of visibleColumnsConfig(); track col.field) { @if (col.type ===
+  'menu' && col.menuItems) { @for (item of col.menuItems; track item.label) {
+  <button
+    mat-menu-item
+    (click)="executeAction(item)"
+    [disabled]="isMenuItemDisabled(item)"
+  >
+    @if (item.icon) {
+    <mat-icon>{{ item.icon }}</mat-icon>
+    }
+    <span>{{ item.label }}</span>
+  </button>
+  } } }
+</mat-menu>

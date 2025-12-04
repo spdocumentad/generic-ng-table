@@ -25,7 +25,15 @@ export interface ColumnState<T> {
   field: Extract<keyof T, string>; // The data field name (used for matColumnDef)
   label: string;
   sticky?: boolean;
-  type: 'text' | 'number' | 'boolean' | 'date' | 'icon' | 'button' | 'custom';
+  type:
+    | 'text'
+    | 'number'
+    | 'boolean'
+    | 'date'
+    | 'icon'
+    | 'button'
+    | 'menu'
+    | 'custom';
   formatter?: (data: T) => string; // Function to format cell data
 
   alignment?:
@@ -37,7 +45,7 @@ export interface ColumnState<T> {
 
   cssClasses?: string;
 
-  menu?: Partial<MenuItem<T>>;
+  menuItems?: MenuItem<T>[];
 
   tooltip?: Tooltip<T>;
 
@@ -49,6 +57,7 @@ export interface MenuItem<T> {
   label: string;
   action: (data: T) => void;
   icon?: string;
+  disabled?: (data: T) => boolean; // Optional function to disable the item based on row data
 }
 
 export interface Tooltip<T> {

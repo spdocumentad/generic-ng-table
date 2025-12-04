@@ -10,14 +10,22 @@ import {
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { TableService } from '../table-service';
-import { ColumnState } from '../table-state';
+import { ColumnState, MenuItem } from '../table-state';
 import { NgClass } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-smart-table',
-  imports: [MatTableModule, MatSortModule, NgClass, MatTooltipModule, MatIcon],
+  imports: [
+    MatTableModule,
+    MatSortModule,
+    NgClass,
+    MatTooltipModule,
+    MatIcon,
+    MatMenuModule,
+  ],
   templateUrl: './smart-table.html',
   styleUrl: './smart-table.scss',
 })
@@ -62,6 +70,9 @@ export class SmartTable<T extends object> implements AfterViewInit {
 
     return state.columns.filter((col) => visibility[col.field]);
   });
+
+  // Variable to hold the row data for the currently open menu
+  currentMenuRow: T | null = null;
 
   ngAfterViewInit(): void {
     if (this.sort) {
@@ -126,5 +137,34 @@ export class SmartTable<T extends object> implements AfterViewInit {
     return selectedRows.some(
       (selectedRow) => (selectedRow as any)[identifier] === rowIdentifierValue
     );
+  }
+
+  /**
+   * Set the row context for the menu and prevent row selection click event.
+   */
+  openMenu(event: MouseEvent, row: T): void {
+    // Stop event propagation to prevent triggering onRowClick selection logic
+    event.stopPropagation();
+    this.currentMenuRow = row;
+  }
+
+  /**
+   * Executes the action defined in the menu item.
+   */
+  executeAction(item: MenuItem<T>): void {
+    if (this.currentMenuRow && item.action) {
+      item.action(this.currentMenuRow);
+    }
+    this.currentMenuRow = null; // Clear context after execution
+  }
+
+  /**
+   * Check if a menu item should be disabled.
+   */
+  isMenuItemDisabled(item: MenuItem<T>): boolean {
+    if (item.disabled && this.currentMenuRow) {
+      return item.disabled(this.currentMenuRow);
+    }
+    return false;
   }
 }

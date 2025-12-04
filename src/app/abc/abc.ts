@@ -64,6 +64,28 @@ export class Abc implements OnInit {
       alignment: 'center',
       visible: false,
     },
+    {
+      // Note: The field name here is arbitrary as no data is displayed, but must be unique.
+      field: 'rowMenu' as keyof GenericItem,
+      label: 'Options',
+      type: 'menu',
+      sticky: true, // Stick the menu to the right side
+      alignment: 'center',
+      menuItems: [
+        {
+          label: 'Promote',
+          icon: 'trending_up',
+          action: (item) => this.promoteEmployee(item),
+          // Disable promotion for employees already earning over $130k
+          disabled: (item) => item.salary > 130000,
+        },
+        {
+          label: 'View Profile',
+          icon: 'person',
+          action: (item) => this.viewProfile(item),
+        },
+      ],
+    },
   ];
 
   // 2. Sample Data
@@ -110,6 +132,21 @@ export class Abc implements OnInit {
 
   // Inject the service using the specific type
   private readonly tableService = inject(TableService<GenericItem>);
+
+  // Action handlers for the custom menu
+  promoteEmployee(item: GenericItem): void {
+    // Demonstrating the action execution from the row menu
+    console.log(
+      `ACTION EXECUTED: Promoted ${item.name}. Salary update pending.`
+    );
+    // A real application would typically use a custom modal here, but for demonstration, we log the action.
+  }
+
+  viewProfile(item: GenericItem): void {
+    console.log(
+      `ACTION EXECUTED: Viewing profile for ${item.name} (ID: ${item.id}).`
+    );
+  }
 
   ngOnInit(): void {
     // Pass the full configuration to the service
