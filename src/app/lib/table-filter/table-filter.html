@@ -1,0 +1,10 @@
+<mat-form-field appearance="outline" class="table-filter-input">
+  <mat-label>Search Table</mat-label>
+  <input
+    matInput
+    placeholder="e.g. Acme, 100"
+    [value]="filterValue()"
+    (keyup)="onFilter($event)"
+  />
+  <mat-icon matPrefix>search</mat-icon>
+</mat-form-field>

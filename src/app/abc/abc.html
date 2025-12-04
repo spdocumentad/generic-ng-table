@@ -1,0 +1,27 @@
+<div class="abc-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Smart Schema-Driven Table</mat-card-title>
+      <mat-card-subtitle
+        >Type-safe control flow powered by TableService state</mat-card-subtitle
+      >
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="table-toolbar">
+        <!-- Filter Search Box -->
+        <app-table-filter />
+
+        <span class="spacer"></span>
+
+        <!-- Column Hide/Show Menu -->
+        <!-- We don't need the [allColumns] input anymore, as it gets the columns from the service -->
+        <app-column-select />
+      </div>
+
+      <!-- The Smart Table is now purely driven by the service state -->
+      <!-- We only need to pass the list of field names for the MatTableDef loop -->
+      <app-smart-table />
+    </mat-card-content>
+  </mat-card>
+</div>

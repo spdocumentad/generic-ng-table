@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
-import { ViewComp } from './view-comp/view-comp';
+import { Abc } from './abc/abc';
 
 @Component({
   selector: 'app-root',
-  imports: [ViewComp],
+  imports: [Abc],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

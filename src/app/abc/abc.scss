@@ -1,0 +1,25 @@
+.abc-container {
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+.table-filter-input {
+  max-width: 300px;
+}
+
+mat-card-content {
+  padding-top: 20px;
+}

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FlightList } from './flight-list';
+import { SmartTable } from './smart-table';
 
-describe('FlightList', () => {
-  let component: FlightList;
-  let fixture: ComponentFixture<FlightList>;
+describe('SmartTable', () => {
+  let component: SmartTable;
+  let fixture: ComponentFixture<SmartTable>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FlightList]
+      imports: [SmartTable]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(FlightList);
+    fixture = TestBed.createComponent(SmartTable);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
