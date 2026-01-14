@@ -1,0 +1,26 @@
+@for (item of items(); track item.label) { @if (item.children &&
+item.children.length > 0) {
+<button
+  mat-menu-item
+  [matMenuTriggerFor]="subMenuRef"
+  [disabled]="isItemDisabled(item)"
+  class="menu-item"
+>
+  @if (item.icon) { <mat-icon>{{ item.icon }}</mat-icon> }
+  <span>{{ item.label }}</span>
+</button>
+
+<mat-menu #subMenuRef="matMenu" class="skyfleet-submenu">
+  <app-menu-recursive [items]="item.children" [rowData]="rowData()" />
+</mat-menu>
+} @else {
+<button
+  mat-menu-item
+  [disabled]="isItemDisabled(item)"
+  (click)="handleAction(item)"
+  class="menu-item"
+>
+  @if (item.icon) { <mat-icon>{{ item.icon }}</mat-icon> }
+  <span>{{ item.label }}</span>
+</button>
+} }

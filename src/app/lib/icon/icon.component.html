@@ -1,0 +1,15 @@
+@if (isSvg()) {
+  <mat-icon
+    class="noselect svg"
+    [svgIcon]="name()"
+    [attr.style]="{ width: size(), height: size() }"
+    [matTooltip]="text()" />
+} @else {
+  <mat-icon
+    class="noselect"
+    [matTooltip]="text()"
+    [inline]
+    [ngStyle]="{ width: size(), height: size(), 'font-size': size() }"
+    >{{ name() }}</mat-icon
+  >
+}

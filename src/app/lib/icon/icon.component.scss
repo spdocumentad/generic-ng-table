@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.svg {
+  ::ng-deep svg {
+    display: block;
+  }
+}
+
+.mat-icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  font-size: var(--icon-size);
+}

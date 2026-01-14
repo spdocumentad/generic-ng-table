@@ -1,0 +1,58 @@
+$width-open: 100px;
+$width-close: 0px;
+
+.filterNeverOpened {
+  background-color: rgba(70, 130, 180, 0.1);
+  color: ghostwhite;
+  height: 28.8px;
+  width: $width-close;
+  margin-right: 4px;
+  box-shadow: 0 0 0 0;
+  opacity: 0;
+}
+
+.filterInputOpen {
+  background-color: rgba(70, 130, 180, 0.1);
+  color: ghostwhite;
+  height: 28.8px;
+  width: $width-open;
+  margin-right: 4px;
+  box-shadow: 0 0 0 0;
+  animation-name: open;
+  animation-duration: 250ms;
+  animation-direction: normal;
+}
+
+.filterInputClose {
+  background-color: rgba(70, 130, 180, 0.1);
+  color: ghostwhite;
+  height: 28.8px;
+  width: $width-close;
+  margin-right: 4px;
+  box-shadow: 0 0 0 0;
+  opacity: 0;
+  animation-name: close;
+  animation-duration: 250ms;
+  animation-direction: normal;
+}
+
+@keyframes open {
+  0% {
+    width: $width-close;
+  }
+
+  100% {
+    width: $width-open;
+  }
+}
+@keyframes close {
+  0% {
+    width: $width-open;
+    opacity: 1;
+  }
+
+  100% {
+    width: $width-close;
+    opacity: 0;
+  }
+}

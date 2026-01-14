@@ -1,25 +1,17 @@
 import { Component, computed, inject, input, OnInit } from '@angular/core';
-import { TableService } from '../table-service';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-
-/**
- * Interface for the field configuration passed into the component.
- * We now strictly type 'field' as a key of T to resolve the indexing error 7053.
- */
-interface FilterField<T extends object> {
-  field: Extract<keyof T, string>; // Strictly typed key
-  label: string;
-}
+import { TableService } from '../table.service';
+import { FilterField } from '../table-state';
+import { MatSelectModule } from '@angular/material/select';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-select-filter',
   imports: [MatSelectModule, MatFormFieldModule, ReactiveFormsModule],
-  templateUrl: './select-filter.html',
-  styleUrl: './select-filter.scss',
+  templateUrl: './select-filter.component.html',
+  styleUrl: './select-filter.component.scss'
 })
-export class SelectFilter<T extends object> implements OnInit {
+export class SelectFilterComponent<T extends object> implements OnInit {
   private tableService = inject(TableService<T>);
 
   filterFields = input<FilterField<T>[]>([]);

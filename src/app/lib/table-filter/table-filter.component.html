@@ -1,0 +1,22 @@
+<input
+  class="form-control"
+  #filter
+  [value]="filterValue()"
+  [class]="{
+    filterNeverOpened: isFirstOpen && !isShowFilter,
+    filterInputOpen: isShowFilter && !isFirstOpen,
+    filterInputClose: !isShowFilter && !isFirstOpen,
+  }"
+  (keyup)="onFilter($event)"
+  (click)="stopPropagation($event)"
+  type="text"
+  spellcheck="false"
+  placeholder="Filter..." />
+<app-icon-button
+  class="floating-panel-accordion-expansion-header-icon"
+  [config]="{
+    name: isShowFilter ? 'close' : 'search',
+    size: '20px',
+  }"
+  (click)="showFilter($event)" />
+

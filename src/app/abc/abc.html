@@ -14,12 +14,12 @@
         <span class="spacer"></span>
         <app-table-filter />
         <app-select-filter [filterFields]="criteriaFilterFields" />
-        <app-column-select />
+        <app-column-filter />
       </div>
 
       <!-- The Smart Table is now purely driven by the service state -->
       <!-- We only need to pass the list of field names for the MatTableDef loop -->
-      <app-smart-table />
+      <app-table (rowSelectionChanged)="onRowSelectionChanged($event)" />
     </mat-expansion-panel>
   </mat-accordion>
 </div>

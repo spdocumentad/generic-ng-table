@@ -1,0 +1,196 @@
+$darkBackground-color: #303030;
+
+$status-green-color: #6ecd32;
+$status-red-color: #ff0000; // red
+
+// Simply input new colors if needed
+$blue-color: #1e90ff; // dodgerblue
+$darkGray-color: #26282d;
+$grey-color: #8d8d8d; // $gray-color: #4682b41a;
+$lightGray-color: #d3d3d3;
+
+$orange-color: #ffa500; // orange
+
+$white-color: #f8f8ff;
+$whitesmoke-color: #f5f5f5;
+
+:host {
+  --diff-time: 10000ms;
+  //background: rgb(38, 40, 45);
+  --icon-size: 17px;
+
+  .notification-dot {
+    height: 8px;
+    width: 8px;
+    background-color: purple;
+    border-radius: 50%;
+    border: 1px solid white;
+    position: absolute;
+    top: -2px;
+    left: 12px;
+  }
+
+  .table {
+    margin: 0;
+    flex: 1;
+    &-disabled {
+      opacity: 0.5;
+      --bs-table-striped-bg: sky.$darkBackground-color;
+    }
+
+    tr.mat-mdc-header-row,
+    tr.mat-mdc-row,
+    tr.mat-mdc-footer-row {
+      height: 32px;
+    }
+
+    th.mat-mdc-header-cell {
+      font-weight: 500;
+    }
+
+    td.mat-mdc-cell,
+    td.mat-mdc-footer-cell {
+      font-weight: 400;
+    }
+
+    th.mat-mdc-header-cell,
+    td.mat-mdc-cell,
+    td.mat-mdc-footer-cell {
+      padding: 0.5rem 0.5rem;
+      font-family: "B612", sans-serif;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    td {
+      border-bottom-width: 0px;
+    }
+
+    &-row {
+      &-selected {
+        --bs-table-striped-bg: var(--colorSelection) !important;
+        --bs-table-accent-bg: var(--colorSelection) !important;
+        --bs-table-hover-bg: var(--colorSelection) !important;
+        background-color: var(--colorSelection);
+        &:hover {
+          filter: brightness(1.2);
+        }
+      }
+    }
+
+    &-cell {
+      &-menu {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        height: var(--icon-size);
+        &-button {
+          &-hover {
+            visibility: hidden;
+          }
+        }
+
+        &:hover {
+          .table-cell-menu-button-hover {
+            visibility: visible;
+          }
+        }
+      }
+
+      &-callsign {
+        font-weight: 700;
+      }
+    }
+
+    &-updated {
+      animation-name: updated;
+      animation-duration: var(--diff-time);
+      animation-direction: normal;
+    }
+  }
+}
+
+::ng-deep .table-tooltip {
+  color: rgba(0, 0, 0, 0.87) !important;
+  background-color: #fff;
+  overflow: unset !important;
+  font-size: 12px;
+}
+
+@keyframes updated {
+  0%,
+  100% {
+    color: white;
+    font-style: normal;
+  }
+
+  20%,
+  80% {
+    color: yellow;
+    font-style: italic;
+  }
+}
+
+.example-menu {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 180px;
+  max-width: 280px;
+  background-color: rgb(255, 255, 255);
+  padding: 6px 0;
+  border-radius: 3px;
+}
+
+.example-menu-item {
+  background-color: transparent;
+  cursor: pointer;
+  border: none;
+
+  user-select: none;
+  min-width: 64px;
+  line-height: 36px;
+  padding: 0 16px;
+
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex: 1;
+}
+
+.example-menu-item:hover {
+  background-color: rgb(208, 208, 208);
+}
+
+.example-menu-item:active {
+  background-color: rgb(170, 170, 170);
+}
+
+.skyfleet-context-menu-wrapper {
+  background: #aeadad; // Match your dark theme
+  border: 1px solid #333;
+  border-radius: 4px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  min-width: 180px;
+  padding: 4px 0;
+  z-index: 1000;
+
+  // Ensure the buttons inside the recursive component match the context menu style
+  ::ng-deep .menu-item {
+    color: #e0e0e0;
+    font-size: 13px;
+    height: 36px;
+    line-height: 36px;
+
+    &:hover {
+      background-color: #333;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      height: 18px;
+      width: 18px;
+      margin-right: 8px;
+    }
+  }
+}

@@ -1,0 +1,31 @@
+.disabled {
+  cursor: no-drop;
+  opacity: 0.5;
+}
+
+// tooltip visible in modal
+::ng-deep .cdk-overlay-container {
+  z-index: 2000;
+}
+
+#main-container {
+  display: block;
+}
+
+.enabled {
+  cursor: pointer;
+  opacity: 1;
+
+  &:active {
+    transform: translateY(3px);
+  }
+
+  &.with-hover {
+    &:hover {
+      transform: scale(1.2) rotate(-10deg);
+    }
+    &:active {
+      transform: translateY(3px);
+    }
+  }
+}

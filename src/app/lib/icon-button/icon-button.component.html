@@ -1,0 +1,10 @@
+@if (resolvedConfig(); as conf) {
+  <div
+    id="main-container"
+    [ngClass]="{ enabled: conf.isEnabled, disabled: !conf.isEnabled, 'with-hover': conf.withHover }"
+    [ngStyle]="{ width: conf.size, height: conf.size }"
+    [matTooltip]="conf.tooltipText || ''"
+    [matTooltipPosition]="conf.tooltipPosition">
+    <app-icon [name]="conf.name" [isSvg]="conf.isSvg" [size]="conf.size" />
+  </div>
+}

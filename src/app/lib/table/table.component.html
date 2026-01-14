@@ -1,0 +1,148 @@
+@if (state(); as tState) {
+<div class="table-wrapper relative overflow-hidden">
+  <!-- @if (tState.loading) {
+    <div class="absolute inset-0 z-20 flex items-center justify-center bg-black/20 backdrop-blur-[1px]">
+       <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } -->
+
+  <table
+    class="table table-dark table-striped table-hover skyfleet-table"
+    [class.table-disabled]="tState.disabled"
+    [dataSource]="tableData()"
+    [matSortActive]="tState.sort.key || ''"
+    [matSortDirection]="tState.sort.direction || 'asc'"
+    mat-table
+    matSort
+  >
+    @for (col of allColumnsConfig(); track col.field) {
+    <ng-container
+      [matColumnDef]="col.field"
+      [sticky]="col.sticky"
+      [stickyEnd]="col.type === 'menu' && col.sticky"
+    >
+      <th
+        *matHeaderCellDef
+        [matTooltip]="col.headerTooltip || ''"
+        [matTooltipPosition]="col.tooltip?.position || 'above'"
+        [class]="col.cssClasses"
+        [disabled]="col.sortable === false"
+        mat-header-cell
+        mat-sort-header
+      >
+        {{ col.label }}
+      </th>
+
+      <td *matCellDef="let element" [class]="col.cssClasses" mat-cell>
+        <div
+          class="table-cell-content"
+          [style.justify-content]="col.alignment || 'flex-start'"
+          [matTooltip]="
+            col.tooltip?.content ? col.tooltip?.content(element) : ''
+          "
+          [matTooltipPosition]="col.tooltip?.position || 'above'"
+          [matTooltipDisabled]="
+            !col.tooltip ||
+            (col.tooltip['disabled'] ? col.tooltip['disabled'](element) : false)
+          "
+        >
+          @switch (col.type) { @case ('boolean') {
+          <mat-icon
+            [color]="
+              getCellValue(element, col).toLowerCase() === 'yes'
+                ? 'primary'
+                : 'warn'
+            "
+          >
+            {{
+              getCellValue(element, col).toLowerCase() === "yes"
+                ? "check_circle"
+                : "cancel"
+            }}
+          </mat-icon>
+          } @case ('icon') {
+          <app-icon
+            [name]="getCellValue(element, col)"
+            [isSvg]="false"
+            size="1rem"
+          />
+          } @case ('button') {
+          <app-icon-button
+            [config]="{
+                    name: getCellValue(element, col),
+                    size: '1rem',
+                    isSvg: false,
+                  }"
+          />
+          } @case ('menu') {
+          <div (click)="handleActionClick($event)">
+            <app-icon-button
+              [config]="getMenuButtonConfig(col)"
+              [ngClass]="{
+                'table-cell-menu-button-hover':
+                  col.menuItems?.showOnHover !== false
+              }"
+              [matMenuTriggerFor]="columnMenu"
+            />
+
+            <mat-menu #columnMenu="matMenu">
+              @if (col.menuItems?.menu) {
+              <app-menu-recursive
+                [items]="col.menuItems!.menu"
+                [rowData]="element"
+              />
+
+              }
+            </mat-menu>
+          </div>
+          } @default {
+          <span class="truncate">{{ getCellValue(element, col) }}</span>
+          } }
+        </div>
+      </td>
+    </ng-container>
+    }
+
+    <tr
+      *matHeaderRowDef="visibleColumnConfig().fields; sticky: true"
+      mat-header-row
+    ></tr>
+
+    <tr
+      *matRowDef="let row; columns: visibleColumnConfig().fields"
+      [class.table-row-selected]="isRowSelected(row)"
+      [class.table-disabled]="tState.disabled"
+      [cdkContextMenuTriggerFor]="context_menu"
+      [cdkContextMenuDisabled]="
+        !tState.rowContextMenu || tState.rowContextMenu.length === 0
+      "
+      [cdkContextMenuTriggerData]="{ $implicit: row }"
+      (contextmenu)="onContextMenu(row)"
+      (click)="onRowClick(row, $event)"
+      mat-row
+    ></tr>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td
+        class="text-center p-4"
+        [attr.colspan]="visibleColumnConfig().fields.length"
+      >
+        {{ tState.noDataRowMessage || "No data found" }}
+      </td>
+    </tr>
+  </table>
+
+  <ng-template #context_menu let-row>
+    <div
+      class="skyfleet-context-menu-wrapper"
+      cdkMenu
+      (click)="handleActionClick($event)"
+    >
+      <app-menu-recursive
+        [items]="state().rowContextMenu ?? []"
+        [rowData]="row"
+      />
+    </div>
+  </ng-template>
+</div>
+}

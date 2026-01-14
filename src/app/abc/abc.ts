@@ -6,13 +6,13 @@ import {
   signal,
 } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
-import { TableService } from '../lib/table-service';
-import { SmartTable } from '../lib/smart-table/smart-table';
-import { ColumnSelect } from '../lib/column-select/column-select';
-import { ColumnState } from '../lib/table-state';
-import { SelectFilter } from '../lib/select-filter/select-filter';
-import { TableFilter } from '../lib/table-filter/table-filter';
+import { ColumnState, MenuItem, SelectionExport } from '../lib/table-state';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { TableFilterComponent } from '../lib/table-filter/table-filter.component';
+import { SelectFilterComponent } from '../lib/select-filter/select-filter.component';
+import { ColumnFilterComponent } from '../lib/column-filter/column-filter.component';
+import { TableComponent } from '../lib/table/table.component';
+import { TableService } from '../lib/table.service';
 
 // Define the specific type T (User/Item/Product)
 interface GenericItem {
@@ -27,10 +27,10 @@ interface GenericItem {
   selector: 'app-abc',
   standalone: true,
   imports: [
-    SmartTable,
-    TableFilter,
-    ColumnSelect,
-    SelectFilter,
+    TableFilterComponent,
+    SelectFilterComponent,
+    ColumnFilterComponent,
+    TableComponent,
     MatCardModule,
     MatExpansionModule,
   ],
@@ -40,21 +40,14 @@ interface GenericItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Abc implements OnInit {
+  // Inject the service using the specific type
+  private readonly tableService = inject(TableService<GenericItem>);
   readonly panelOpenState = signal(true);
+  // Configuration for filtering logic
   readonly criteriaFilterFields = [
     { field: 'department', label: 'Filter by Department' },
   ];
 
-  // 1. Define the full list of column keys
-  readonly displayedColumns: string[] = [
-    'id',
-    'name',
-    'city',
-    'progress',
-    'isActive',
-  ];
-
-  // 1. Define the full column configuration
   readonly columnsConfig: ColumnState<GenericItem>[] = [
     {
       field: 'id',
@@ -80,7 +73,6 @@ export class Abc implements OnInit {
       label: 'Annual Salary',
       type: 'number',
       alignment: 'flex-end',
-      // Custom formatter example
       formatter: (data) => `$${data.salary.toLocaleString()}`,
     },
     {
@@ -89,35 +81,98 @@ export class Abc implements OnInit {
       type: 'boolean',
       alignment: 'center',
       visible: false,
-      sortable: false,
       filterableByCriteria: true,
     },
     {
-      // Note: The field name here is arbitrary as no data is displayed, but must be unique.
       field: 'rowMenu' as keyof GenericItem,
       label: 'Options',
       type: 'menu',
-      sticky: true, // Stick the menu to the right side
+      sticky: true,
       alignment: 'center',
-      sortable: false,
-      menuItems: [
-        {
-          label: 'Promote',
-          icon: 'trending_up',
-          action: (item) => this.promoteEmployee(item),
-          // Disable promotion for employees already earning over $130k
-          disabled: (item) => item.salary > 130000,
-        },
-        {
-          label: 'View Profile',
-          icon: 'person',
-          action: (item) => this.viewProfile(item),
-        },
-      ],
+      menuItems: {
+        showOnHover: true,
+        icon: 'more_vert',
+        menu: [
+          {
+            label: 'Promote Employee',
+            icon: 'more_vert',
+            // Action execution
+            action: (item) => this.promoteEmployee(item),
+            // Logic: Only Engineering & Sales can be promoted, and only if salary < 130k
+            disabled: (item) =>
+              !['Engineering', 'Sales'].includes(item.department) ||
+              item.salary > 130000,
+          },
+          {
+            label: 'Management Actions',
+            icon: 'more_vert',
+            children: [
+              {
+                label: 'Transfer Department',
+                icon: 'move_down',
+                action: (item) => console.log('Transferring', item.name),
+              },
+              {
+                label: 'Terminate Contract',
+                icon: 'more_vert',
+                action: (item) => console.warn('Terminating', item.name),
+                // Logic: Cannot terminate if they are already External (Contractors)
+                disabled: (item) => item.isExternal,
+              },
+            ],
+          },
+          {
+            label: 'View Full Profile',
+            icon: 'more_vert',
+            action: (item) => this.viewProfile(item),
+          },
+        ],
+      },
     },
   ];
 
-  // 2. Sample Data
+  // inside class Abc
+  readonly contextMenuConfig: MenuItem<GenericItem>[] = [
+    {
+      label: 'Quick Action: Copy ID',
+      icon: 'content_copy',
+      action: (item) => {
+        navigator.clipboard.writeText(item.id.toString());
+        console.log(`Copied ID: ${item.id}`);
+      },
+    },
+    {
+      label: 'Send Notification',
+      icon: 'notifications_active',
+      action: (item) => console.log(`Sending ping to ${item.name}...`),
+      // Disable if salary is too high (logic example)
+      disabled: (item) => item.salary > 130000,
+    },
+    {
+      label: 'Employee Logistics',
+      icon: 'local_shipping',
+      children: [
+        {
+          label: 'Assign Equipment',
+          icon: 'computer',
+          action: (item) => console.log(`Assigning laptop to ${item.name}`),
+        },
+        {
+          label: 'Request Badge',
+          icon: 'badge',
+          action: (item) => console.log(`Badge request for ${item.id}`),
+          // Only available for External contractors
+          disabled: (item) => !item.isExternal,
+        },
+      ],
+    },
+    {
+      label: 'Delete Record',
+      icon: 'delete_forever',
+      action: (item) => console.error(`Deleting ${item.name}...`),
+    },
+  ];
+
   readonly tableData: GenericItem[] = [
     {
       id: 101,
@@ -170,12 +225,6 @@ export class Abc implements OnInit {
     },
   ];
 
-  // Extract all field names for filter/select components
-  readonly columnFieldNames = this.columnsConfig.map((c) => c.field);
-
-  // Inject the service using the specific type
-  private readonly tableService = inject(TableService<GenericItem>);
-
   // Action handlers for the custom menu
   promoteEmployee(item: GenericItem): void {
     // Demonstrating the action execution from the row menu
@@ -192,13 +241,20 @@ export class Abc implements OnInit {
   }
 
   ngOnInit(): void {
-    // Pass the full configuration to the service
-    this.tableService.setInitialConfig(
-      this.tableData,
-      this.columnsConfig,
-      'id', // Identifier field
-      false,
-      3
-    );
+    // 3. Initialize the state via the service
+    // We pass the data, config, and set the pagination/selection defaults
+    this.tableService.setInitialConfig({
+      id: 'employee-table',
+      data: this.tableData,
+      columns: this.columnsConfig,
+      identifier: 'id',
+      multiSelect: true,
+      maxSelectionLimit: 5,
+      rowContextMenu: this.contextMenuConfig,
+    });
+  }
+
+  onRowSelectionChanged(data: SelectionExport<GenericItem>): void {
+    console.log(data);
   }
 }

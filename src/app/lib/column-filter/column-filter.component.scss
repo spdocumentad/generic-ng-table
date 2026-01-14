@@ -1,0 +1,29 @@
+.table-columns-filter {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  list-style: none;
+  flex-direction: column;
+  color: #000;
+  font-size: 14px;
+  li{
+    padding: .2rem;
+    &:hover {
+      background-color: #2a2a2b;
+    }
+  }
+}
+
+.mat-mdc-menu-item {
+  min-height: 28px;
+  line-height: 28px;
+}
+
+::ng-deep .mat-mdc-checkbox-checked .mdc-checkbox__background {
+  background-color: #00205b !important;
+  border-color: #00205b !important;
+}
+
+::ng-deep .column-filter .mat-mdc-menu-content {
+  background-color: transparent;
+}
